@@ -1,6 +1,14 @@
 pipeline {
   agent any
-
+   environment {
+    deploymentName = "devsecops"
+    containerName = "devsecops-container"
+    serviceName = "devsecops-svc"
+    imageName = "siddharth67/numeric-app:${GIT_COMMIT}"
+    applicationURL="http://devsecops-demo.eastus.cloudapp.azure.com"
+    applicationURI="/increment/99"
+  }
+  
   stages {
       stage('Build Artifact') {
             steps {
@@ -80,15 +88,33 @@ pipeline {
             sh 'docker run --rm -v $(pwd):/project openpolicyagent/conftest test --policy opa-k8s-security.rego k8s_deployment_service.yaml'
       }
     }
-      stage('K8S Deployment') {
-        steps {
-          withKubeConfig([credentialsId: "kubeconfig"]) {
-            sh "kubectl config current-context"
-            sh "sed -i 's#replace#angalakurthymahesh/numeric-app:${GIT_COMMIT}#g' k8s_deployment_service.yaml"
-            sh "kubectl apply -f k8s_deployment_service.yaml"
+      // stage('K8S Deployment') {
+      //   steps {
+      //     withKubeConfig([credentialsId: "kubeconfig"]) {
+      //       sh "kubectl config current-context"
+      //       sh "sed -i 's#replace#angalakurthymahesh/numeric-app:${GIT_COMMIT}#g' k8s_deployment_service.yaml"
+      //       sh "kubectl apply -f k8s_deployment_service.yaml"
+      //     }
+      //   }
+      // }
+
+      //    stage('K8S Deployment - PROD') {
+      steps {
+        parallel(
+          "Deployment": {
+            withKubeConfig([credentialsId: 'kubeconfig']) {
+              sh "sed -i 's#replace#${imageName}#g' k8s_PROD-deployment_service.yaml"
+              sh "kubectl -n prod apply -f k8s_PROD-deployment_service.yaml"
+            }
+          },
+          "Rollout Status": {
+            withKubeConfig([credentialsId: 'kubeconfig']) {
+              sh "bash k8s-PROD-deployment-rollout-status.sh"
+            }
           }
-        }
+        )
       }
+    }
 
     }
 
