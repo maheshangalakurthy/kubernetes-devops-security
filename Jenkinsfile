@@ -25,12 +25,12 @@ pipeline {
         steps {
           sh "mvn org.pitest:pitest-maven:mutationCoverage"
         }
-        // post {
-        //   always {
-        //     // pitmutation mutationStatsFile: 'target/pit-reports/**/mutations.xml'
-        //     pitmutation mutationStatsFile: '**/target/pit-reports/**/mutations.xml'
-        //   }
-        // }
+        post {
+          always {
+            // pitmutation mutationStatsFile: 'target/pit-reports/**/mutations.xml'
+            pitmutation mutationStatsFile: '**/target/pit-reports/**/mutations.xml'
+          }
+        }
        }
 
       // stage('SonarQube - SAST') {
@@ -95,7 +95,7 @@ pipeline {
     post {
         always {
            dependencyCheckPublisher pattern: 'target/dependency-check-report.xml'
-           pitmutation mutationStatsFile: '**/target/pit-reports/**/mutations.xml'
+          //  pitmutation mutationStatsFile: '**/target/pit-reports/**/mutations.xml'
            junit 'target/surefire-reports/*.xml'
            jacoco execPattern: 'target/jacoco.exec'
         }
