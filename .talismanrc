@@ -1,0 +1,4 @@
+fileignoreconfig:
+- filename: sec_files/file3
+  checksum: 4d7c3e4b4fc17263b0d2db812df63a4f3c854ad988b2047f033f973c25d84e19
+
