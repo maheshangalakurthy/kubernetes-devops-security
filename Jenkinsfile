@@ -10,6 +10,7 @@ pipeline {
         }   
        stage('Unit Tests') {
             steps {
+              sh "whoami"
               sh "mvn test"
             }
             post {
