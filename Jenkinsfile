@@ -50,13 +50,16 @@ pipeline {
         withSonarQubeEnv('SonarQube') {
           sh "mvn clean verify sonar:sonar -Dsonar.projectKey=numeric-application -Dsonar.projectName='numeric-application' -Dsonar.host.url=http://devsecops-proj.eastus.cloudapp.azure.com:9000 -Dsonar.token=sqp_daf89bfec6df30c869e1cba12b7683c74b607602"
         }
-        timeout(time: 2, unit: 'MINUTES') {
-          script {
-            waitForQualityGate abortPipeline: true
-          }
-        }
       }
     }
+    stage('Sonarqube quality gate') {
+            steps {
+                timeout(time: 2, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+
        stage('Docker Build and Push') {
         steps {
          
