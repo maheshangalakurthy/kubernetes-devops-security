@@ -44,6 +44,10 @@
 				<plugin>
 					<groupId>org.springframework.boot</groupId>
 					<artifactId>spring-boot-maven-plugin</artifactId>
+					<version>3.7.0</version>
+            <configuration>
+                <release>10</release>
+            </configuration>
 				</plugin>
 			<!--                   Jacoco Plugin                   -->
 				<plugin>
