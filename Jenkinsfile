@@ -8,7 +8,7 @@ pipeline {
     applicationURL="http://devsecops-demo.eastus.cloudapp.azure.com"
     applicationURI="/increment/99"
   }
-  
+
   stages {
       stage('Build Artifact') {
             steps {
@@ -103,8 +103,7 @@ pipeline {
         parallel(
           "Deployment": {
             withKubeConfig([credentialsId: 'kubeconfig']) {
-              sh "sed -i 's#replace#${imageName}#g' k8s_PROD-deployment_service.yaml"
-              sh "kubectl -n prod apply -f k8s_PROD-deployment_service.yaml"
+               sh "bash k8s-deployment.sh"
             }
           },
           "Rollout Status": {
@@ -114,7 +113,7 @@ pipeline {
           }
         )
       }
-    }
+    
 
     }
 
