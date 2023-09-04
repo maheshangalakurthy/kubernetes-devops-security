@@ -30,5 +30,14 @@ pipeline {
         }
         }
        }   
+
+      stage('K8S Deployment') {
+        steps {
+          withKubeConfig([credentialsId: "kubeconfig"]) {
+            sh "sed -i 's#replace#angalakurthymahesh/numeric-app:${GIT_COMMIT}#g' k8s_deployment_service.yaml"
+            sh "kubectl apply -f k8s_deployment_service.yaml"
+          }
+        }
+      }
     }
 }
