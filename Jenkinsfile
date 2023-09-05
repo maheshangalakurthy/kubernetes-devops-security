@@ -6,7 +6,7 @@ pipeline {
     serviceName = "devsecops-svc"
     imageName = "angalakurthymahesh/numeric-app:${GIT_COMMIT}"
     applicationURL="devsecops-proj.eastus.cloudapp.azure.com"
-    applicationURI="/increment/99"
+    applicationURI="increment/99"
   }
 
   stages {
