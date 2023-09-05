@@ -22,16 +22,16 @@ pipeline {
             }
         }
 
-      //  stage('Mutation Tests - PIT') {
-      //   steps {
-      //     sh "mvn org.pitest:pitest-maven:mutationCoverage"
-      //   }
-      //   post {
-      //     always {
-      //       pitmutation mutationStatsFile: '**/target/pit-reports/**/mutations.xml'
-      //     }
-      //   }
-      //  }
+       stage('Mutation Tests - PIT') {
+        steps {
+          sh "mvn org.pitest:pitest-maven:mutationCoverage"
+        }
+        post {
+          always {
+            pitmutation mutationStatsFile: '**/target/pit-reports/**/mutations.xml'
+          }
+        }
+       }
 
      
       stage('SonarQube - SAST') {
@@ -41,29 +41,29 @@ pipeline {
         }
       }
     }
-    // stage('Sonarqube quality gate') {
-    //         steps {
-    //             timeout(time: 2, unit: 'MINUTES') {
-    //                 waitForQualityGate abortPipeline: true
-    //             }
-    //         }
-    //     }
+    stage('Sonarqube quality gate') {
+            steps {
+                timeout(time: 2, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
    
-    // stage('Vulnerability Scan - Docker') {
-    //   steps {
-    //     parallel(
-    //       "Dependency Scan": {
-    //         sh "mvn dependency-check:check"
-    //       },
-    //       "Trivy Scan": {
-    //         sh "bash trivy-docker-image-scan.sh"
-    //       },
-    //       "OPA Conftest":{
-		// 		    sh 'docker run --rm -v $(pwd):/project openpolicyagent/conftest test --policy opa-docker-security.rego Dockerfile'
-		// 	}   
-    //     )
-    //   }
-    // }
+    stage('Vulnerability Scan - Docker') {
+      steps {
+        parallel(
+          "Dependency Scan": {
+            sh "mvn dependency-check:check"
+          },
+          "Trivy Scan": {
+            sh "bash trivy-docker-image-scan.sh"
+          },
+          "OPA Conftest":{
+				    sh 'docker run --rm -v $(pwd):/project openpolicyagent/conftest test --policy opa-docker-security.rego Dockerfile'
+			}   
+        )
+      }
+    }
        stage('Docker Build and Push') {
         steps {
          
@@ -75,21 +75,21 @@ pipeline {
         }
        }   
 
-    //      stage('Vulnerability Scan - Kubernetes') {
-    //   steps {
-    //     parallel(
-    //       "OPA Scan": {
-    //         sh 'docker run --rm -v $(pwd):/project openpolicyagent/conftest test --policy opa-k8s-security.rego k8s_deployment_service.yaml'
-    //       },
-    //       "Kubesec Scan": {
-    //         sh "bash kubesec-scan.sh"
-    //       },
-    //       "Trivy Scan": {
-    //         sh "bash trivy-k8s-scan.sh"
-    //       }
-    //     )
-    //   }
-    // }
+         stage('Vulnerability Scan - Kubernetes') {
+      steps {
+        parallel(
+          "OPA Scan": {
+            sh 'docker run --rm -v $(pwd):/project openpolicyagent/conftest test --policy opa-k8s-security.rego k8s_deployment_service.yaml'
+          },
+          "Kubesec Scan": {
+            sh "bash kubesec-scan.sh"
+          },
+          "Trivy Scan": {
+            sh "bash trivy-k8s-scan.sh"
+          }
+        )
+      }
+    }
 
       stage('K8S Deployment - PROD') {
       steps {
@@ -126,13 +126,13 @@ pipeline {
       }
     }    
 
-    // stage('OWASP ZAP - DAST') {
-    //   steps {
-    //     withKubeConfig([credentialsId: 'kubeconfig']) {
-    //       sh 'bash zap.sh'
-    //     }
-    //   }
-    // }
+    stage('OWASP ZAP - DAST') {
+      steps {
+        withKubeConfig([credentialsId: 'kubeconfig']) {
+          sh 'bash zap.sh'
+        }
+      }
+    }
     
 
     }
