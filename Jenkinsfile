@@ -107,9 +107,8 @@ pipeline {
         )
       }
     }
-    }
 
-     stage('Integration Tests - PROD') {
+    stage('Integration Tests - PROD') {
       steps {
         script {
           try {
@@ -125,6 +124,9 @@ pipeline {
         }
       }
     }    
+    }
+
+     
 
     post {
         always {
