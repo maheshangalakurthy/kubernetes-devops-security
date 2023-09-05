@@ -113,7 +113,7 @@ pipeline {
         script {
           try {
             withKubeConfig([credentialsId: 'kubeconfig']) {
-              sh "sudo bash integration-test.sh"
+              sh "bash integration-test.sh"
              
             }
           } catch (e) {
