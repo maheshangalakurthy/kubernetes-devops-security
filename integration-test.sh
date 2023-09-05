@@ -8,8 +8,8 @@ PORT=$(kubectl -n default get svc ${serviceName} -o json | jq .spec.ports[].node
 
 echo $PORT
 echo $applicationURL:$PORT/$applicationURI
-curl -s -o /dev/null -w "%{http_code}" localhost:30638/increment/99
-curl -s localhost:30638/increment/99
+curl -s -o /dev/null -w "%{http_code}" devsecops-proj.eastus.cloudapp.azure.com:30638/increment/99
+curl -s devsecops-proj.eastus.cloudapp.azure.com:30638/increment/99
 # if [[ ! -z "$PORT" ]];
 # then
 
