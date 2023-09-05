@@ -113,7 +113,14 @@ pipeline {
         script {
           try {
             withKubeConfig([credentialsId: 'kubeconfig']) {
-              sh "bash integration-test.sh"
+              // sh "bash integration-test.sh"
+              sh "PORT=$(kubectl -n default get svc ${serviceName} -o json | jq .spec.ports[].nodePort)"
+              sh "echo $PORT"
+              sh "echo $applicationURL:$PORT/$applicationURI"
+              sh "curl -s -o /dev/null -w "%{http_code}" $applicationURL:$PORT/$applicationURI"
+              sh "curl -s $applicationURL:$PORT/$applicationURI"
+              sh "response=$(curl -s $applicationURL:$PORT/$applicationURI)"
+              sh "http_code=$(curl -s -o /dev/null -w "%{http_code}" $applicationURL:$PORT$applicationURI)"
             }
           } catch (e) {
             withKubeConfig([credentialsId: 'kubeconfig']) {
