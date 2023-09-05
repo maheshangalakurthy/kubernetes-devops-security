@@ -18,15 +18,8 @@ pipeline {
         }   
        stage('Unit Tests and JoCoCo') {
             steps {
-              sh "whoami"
               sh "mvn test"
             }
-            // post {
-            //   always {
-            //     junit 'target/surefire-reports/*.xml'
-            //     jacoco execPattern: 'target/jacoco.exec'
-            //   }
-            // }
         }
 
        stage('Mutation Tests - PIT') {
@@ -35,7 +28,6 @@ pipeline {
         }
         post {
           always {
-            // pitmutation mutationStatsFile: 'target/pit-reports/**/mutations.xml'
             pitmutation mutationStatsFile: '**/target/pit-reports/**/mutations.xml'
           }
         }
@@ -98,15 +90,6 @@ pipeline {
         )
       }
     }
-      // stage('K8S Deployment') {
-      //   steps {
-      //     withKubeConfig([credentialsId: "kubeconfig"]) {
-      //       sh "kubectl config current-context"
-      //       sh "sed -i 's#replace#angalakurthymahesh/numeric-app:${GIT_COMMIT}#g' k8s_deployment_service.yaml"
-      //       sh "kubectl apply -f k8s_deployment_service.yaml"
-      //     }
-      //   }
-      // }
 
       stage('K8S Deployment - PROD') {
       steps {
@@ -126,10 +109,26 @@ pipeline {
     }
     }
 
+     stage('Integration Tests - PROD') {
+      steps {
+        script {
+          try {
+            withKubeConfig([credentialsId: 'kubeconfig']) {
+              sh "bash integration-test.sh"
+            }
+          } catch (e) {
+            withKubeConfig([credentialsId: 'kubeconfig']) {
+              sh "kubectl -n prod rollout undo deploy ${deploymentName}"
+            }
+            throw e
+          }
+        }
+      }
+    }    
+
     post {
         always {
            dependencyCheckPublisher pattern: 'target/dependency-check-report.xml'
-          //  pitmutation mutationStatsFile: '**/target/pit-reports/**/mutations.xml'
            junit 'target/surefire-reports/*.xml'
            jacoco execPattern: 'target/jacoco.exec'
         }
