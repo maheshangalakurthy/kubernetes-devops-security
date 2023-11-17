@@ -45,5 +45,15 @@ pipeline {
       }
     }
 
+    	stage('Vulnerability Scan') {
+      steps {
+        parallel(
+        	"Dependency Scan": {
+        		sh "mvn dependency-check:check"
+			},
+			
+      	)
+      }
+    }
   }
 }
