@@ -2,6 +2,14 @@
 
 pipeline {
   agent any
+  environment {
+    deploymentName = "devsecops"
+    containerName = "devsecops-container"
+    serviceName = "devsecops-svc"
+    imageName = "angalakurthymahesh/numeric-app:${GIT_COMMIT}"
+    applicationURL="http://devsecops-demo.eastus.cloudapp.azure.com"
+    applicationURI="/increment/99"
+  }
   stages {
     stage('Maven Build Artifacts') {
       steps {
@@ -61,7 +69,7 @@ pipeline {
       }
     }
 
-        stage('Vulnerability Scan - Kubernetes') {
+    stage('Vulnerability Scan - Kubernetes') {
       steps {
         parallel(
           "OPA Scan": {
@@ -73,6 +81,23 @@ pipeline {
           // "Trivy Scan": {
           //   sh "bash trivy-k8s-scan.sh"
           // }
+        )
+      }
+    }
+
+        stage('K8S Deployment - DEV') {
+      steps {
+        parallel(
+          "Deployment": {
+            withKubeConfig([credentialsId: 'kubeconfig']) {
+              sh "bash k8s-deployment.sh"
+            }
+          },
+          "Rollout Status": {
+            withKubeConfig([credentialsId: 'kubeconfig']) {
+              sh "bash k8s-PROD-deployment-rollout-status.sh"
+            }
+          }
         )
       }
     }
